@@ -40,4 +40,13 @@ func addMemoryMetrics(
 			memoryMetrics.NodeUtilization(mb, currentTime, float64(*s.UsageBytes)/nodeMemoryLimit)
 		}
 	}
+
+	if s.PSI != nil {
+		if s.PSI.Full.Total != 0 {
+			memoryMetrics.PressureStalled(mb, currentTime, float64(s.PSI.Full.Total)/1_000_000)
+		}
+		if s.PSI.Some.Total != 0 {
+			memoryMetrics.PressureWaiting(mb, currentTime, float64(s.PSI.Some.Total)/1_000_000)
+		}
+	}
 }

@@ -24,6 +24,8 @@ type CPUMetrics struct {
 	NodeUtilization    RecordDoubleDataPointFunc
 	LimitUtilization   RecordDoubleDataPointFunc
 	RequestUtilization RecordDoubleDataPointFunc
+	PressureStalled    RecordDoubleDataPointFunc
+	PressureWaiting    RecordDoubleDataPointFunc
 }
 
 var NodeCPUMetrics = CPUMetrics{
@@ -45,6 +47,8 @@ var ContainerCPUMetrics = CPUMetrics{
 	NodeUtilization:    (*MetricsBuilder).RecordK8sContainerCPUNodeUtilizationDataPoint,
 	LimitUtilization:   (*MetricsBuilder).RecordK8sContainerCPULimitUtilizationDataPoint,
 	RequestUtilization: (*MetricsBuilder).RecordK8sContainerCPURequestUtilizationDataPoint,
+	PressureStalled:    (*MetricsBuilder).RecordContainerCPUPressureStalledDataPoint,
+	PressureWaiting:    (*MetricsBuilder).RecordContainerCPUPressureWaitingDataPoint,
 }
 
 type MemoryMetrics struct {
@@ -57,6 +61,8 @@ type MemoryMetrics struct {
 	WorkingSet         RecordIntDataPointFunc
 	PageFaults         RecordIntDataPointFunc
 	MajorPageFaults    RecordIntDataPointFunc
+	PressureStalled    RecordDoubleDataPointFunc
+	PressureWaiting    RecordDoubleDataPointFunc
 }
 
 var NodeMemoryMetrics = MemoryMetrics{
@@ -90,6 +96,8 @@ var ContainerMemoryMetrics = MemoryMetrics{
 	WorkingSet:         (*MetricsBuilder).RecordContainerMemoryWorkingSetDataPoint,
 	PageFaults:         (*MetricsBuilder).RecordContainerMemoryPageFaultsDataPoint,
 	MajorPageFaults:    (*MetricsBuilder).RecordContainerMemoryMajorPageFaultsDataPoint,
+	PressureStalled:    (*MetricsBuilder).RecordContainerMemoryPressureStalledDataPoint,
+	PressureWaiting:    (*MetricsBuilder).RecordContainerMemoryPressureWaitingDataPoint,
 }
 
 type FilesystemMetrics struct {
@@ -163,4 +171,14 @@ var PodUptimeMetrics = UptimeMetrics{
 
 var ContainerUptimeMetrics = UptimeMetrics{
 	Uptime: (*MetricsBuilder).RecordContainerUptimeDataPoint,
+}
+
+type IoMetrics struct {
+	PressureStalled RecordDoubleDataPointFunc
+	PressureWaiting RecordDoubleDataPointFunc
+}
+
+var ContainerIoMetrics = IoMetrics{
+	PressureStalled: (*MetricsBuilder).RecordContainerIoPressureStalledDataPoint,
+	PressureWaiting: (*MetricsBuilder).RecordContainerIoPressureWaitingDataPoint,
 }

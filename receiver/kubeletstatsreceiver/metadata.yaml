@@ -80,6 +80,28 @@ attributes:
     type: string
 
 metrics:
+  container.cpu.pressure.stalled:
+    enabled: true
+    description: "Total cumulative CPU stalled time"
+    unit: s
+    stability:
+      level: development
+    sum:
+      value_type: double
+      monotonic: true
+      aggregation_temporality: cumulative
+    attributes: []
+  container.cpu.pressure.waiting:
+    enabled: true
+    description: "Total cumulative CPU waiting time"
+    unit: s
+    stability:
+      level: development
+    sum:
+      value_type: double
+      monotonic: true
+      aggregation_temporality: cumulative
+    attributes: []
   container.cpu.time:
     enabled: true
     description: "Total cumulative CPU time (sum of all cores) spent by the container/pod/node since its creation"
@@ -127,6 +149,28 @@ metrics:
     gauge:
       value_type: int
     attributes: []
+  container.io.pressure.stalled:
+    enabled: true
+    description: "Total cumulative I/O stalled time"
+    unit: s
+    stability:
+      level: development
+    sum:
+      value_type: double
+      monotonic: true
+      aggregation_temporality: cumulative
+    attributes: []
+  container.io.pressure.waiting:
+    enabled: true
+    description: "Total cumulative I/O waiting time"
+    unit: s
+    stability:
+      level: development
+    sum:
+      value_type: double
+      monotonic: true
+      aggregation_temporality: cumulative
+    attributes: []
   container.memory.available:
     enabled: true
     description: "Container memory available"
@@ -153,6 +197,28 @@ metrics:
       level: development
     gauge:
       value_type: int
+    attributes: []
+  container.memory.pressure.stalled:
+    enabled: true
+    description: "Total cumulative memory stalled time"
+    unit: s
+    stability:
+      level: development
+    sum:
+      value_type: double
+      monotonic: true
+      aggregation_temporality: cumulative
+    attributes: []
+  container.memory.pressure.waiting:
+    enabled: true
+    description: "Total cumulative memory waiting time"
+    unit: s
+    stability:
+      level: development
+    sum:
+      value_type: double
+      monotonic: true
+      aggregation_temporality: cumulative
     attributes: []
   container.memory.rss:
     enabled: true

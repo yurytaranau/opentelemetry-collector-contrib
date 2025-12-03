@@ -28,14 +28,20 @@ func (ms *MetricConfig) Unmarshal(parser *confmap.Conf) error {
 
 // MetricsConfig provides config for kubeletstats metrics.
 type MetricsConfig struct {
+	ContainerCPUPressureStalled          MetricConfig `mapstructure:"container.cpu.pressure.stalled"`
+	ContainerCPUPressureWaiting          MetricConfig `mapstructure:"container.cpu.pressure.waiting"`
 	ContainerCPUTime                     MetricConfig `mapstructure:"container.cpu.time"`
 	ContainerCPUUsage                    MetricConfig `mapstructure:"container.cpu.usage"`
 	ContainerFilesystemAvailable         MetricConfig `mapstructure:"container.filesystem.available"`
 	ContainerFilesystemCapacity          MetricConfig `mapstructure:"container.filesystem.capacity"`
 	ContainerFilesystemUsage             MetricConfig `mapstructure:"container.filesystem.usage"`
+	ContainerIoPressureStalled           MetricConfig `mapstructure:"container.io.pressure.stalled"`
+	ContainerIoPressureWaiting           MetricConfig `mapstructure:"container.io.pressure.waiting"`
 	ContainerMemoryAvailable             MetricConfig `mapstructure:"container.memory.available"`
 	ContainerMemoryMajorPageFaults       MetricConfig `mapstructure:"container.memory.major_page_faults"`
 	ContainerMemoryPageFaults            MetricConfig `mapstructure:"container.memory.page_faults"`
+	ContainerMemoryPressureStalled       MetricConfig `mapstructure:"container.memory.pressure.stalled"`
+	ContainerMemoryPressureWaiting       MetricConfig `mapstructure:"container.memory.pressure.waiting"`
 	ContainerMemoryRss                   MetricConfig `mapstructure:"container.memory.rss"`
 	ContainerMemoryUsage                 MetricConfig `mapstructure:"container.memory.usage"`
 	ContainerMemoryWorkingSet            MetricConfig `mapstructure:"container.memory.working_set"`
@@ -90,6 +96,12 @@ type MetricsConfig struct {
 
 func DefaultMetricsConfig() MetricsConfig {
 	return MetricsConfig{
+		ContainerCPUPressureStalled: MetricConfig{
+			Enabled: true,
+		},
+		ContainerCPUPressureWaiting: MetricConfig{
+			Enabled: true,
+		},
 		ContainerCPUTime: MetricConfig{
 			Enabled: true,
 		},
@@ -105,6 +117,12 @@ func DefaultMetricsConfig() MetricsConfig {
 		ContainerFilesystemUsage: MetricConfig{
 			Enabled: true,
 		},
+		ContainerIoPressureStalled: MetricConfig{
+			Enabled: true,
+		},
+		ContainerIoPressureWaiting: MetricConfig{
+			Enabled: true,
+		},
 		ContainerMemoryAvailable: MetricConfig{
 			Enabled: true,
 		},
@@ -112,6 +130,12 @@ func DefaultMetricsConfig() MetricsConfig {
 			Enabled: true,
 		},
 		ContainerMemoryPageFaults: MetricConfig{
+			Enabled: true,
+		},
+		ContainerMemoryPressureStalled: MetricConfig{
+			Enabled: true,
+		},
+		ContainerMemoryPressureWaiting: MetricConfig{
 			Enabled: true,
 		},
 		ContainerMemoryRss: MetricConfig{

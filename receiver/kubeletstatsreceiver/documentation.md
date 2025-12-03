@@ -12,6 +12,22 @@ metrics:
     enabled: false
 ```
 
+### container.cpu.pressure.stalled
+
+Total cumulative CPU stalled time
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
+| s | Sum | Double | Cumulative | true | Development |
+
+### container.cpu.pressure.waiting
+
+Total cumulative CPU waiting time
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
+| s | Sum | Double | Cumulative | true | Development |
+
 ### container.cpu.time
 
 Total cumulative CPU time (sum of all cores) spent by the container/pod/node since its creation
@@ -52,6 +68,22 @@ Container filesystem usage
 | ---- | ----------- | ---------- | --------- |
 | By | Gauge | Int | Development |
 
+### container.io.pressure.stalled
+
+Total cumulative I/O stalled time
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
+| s | Sum | Double | Cumulative | true | Development |
+
+### container.io.pressure.waiting
+
+Total cumulative I/O waiting time
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
+| s | Sum | Double | Cumulative | true | Development |
+
 ### container.memory.available
 
 Container memory available
@@ -75,6 +107,22 @@ Container memory page_faults
 | Unit | Metric Type | Value Type | Stability |
 | ---- | ----------- | ---------- | --------- |
 | 1 | Gauge | Int | Development |
+
+### container.memory.pressure.stalled
+
+Total cumulative memory stalled time
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
+| s | Sum | Double | Cumulative | true | Development |
+
+### container.memory.pressure.waiting
+
+Total cumulative memory waiting time
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
+| s | Sum | Double | Cumulative | true | Development |
 
 ### container.memory.rss
 

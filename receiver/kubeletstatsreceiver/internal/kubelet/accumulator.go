@@ -114,6 +114,7 @@ func (a *metricDataAccumulator) containerStats(sPod *stats.PodStats, s *stats.Co
 	addCPUMetrics(a.mbs.ContainerMetricsBuilder, metadata.ContainerCPUMetrics, s.CPU, currentTime, a.metadata.containerResources[resourceKey], a.metadata.nodeInfo.CPUCapacity)
 	addMemoryMetrics(a.mbs.ContainerMetricsBuilder, metadata.ContainerMemoryMetrics, s.Memory, currentTime, a.metadata.containerResources[resourceKey], a.metadata.nodeInfo.MemoryCapacity)
 	addFilesystemMetrics(a.mbs.ContainerMetricsBuilder, metadata.ContainerFilesystemMetrics, s.Rootfs, currentTime)
+	addIOMetrics(a.mbs.ContainerMetricsBuilder, metadata.ContainerIoMetrics, s.IO, currentTime)
 
 	a.m = append(a.m, a.mbs.ContainerMetricsBuilder.Emit(
 		metadata.WithStartTimeOverride(pcommon.NewTimestampFromTime(s.StartTime.Time)),

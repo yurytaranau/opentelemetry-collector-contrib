@@ -1,6 +1,10 @@
 default:
 all_set:
   metrics:
+    container.cpu.pressure.stalled:
+      enabled: true
+    container.cpu.pressure.waiting:
+      enabled: true
     container.cpu.time:
       enabled: true
     container.cpu.usage:
@@ -11,11 +15,19 @@ all_set:
       enabled: true
     container.filesystem.usage:
       enabled: true
+    container.io.pressure.stalled:
+      enabled: true
+    container.io.pressure.waiting:
+      enabled: true
     container.memory.available:
       enabled: true
     container.memory.major_page_faults:
       enabled: true
     container.memory.page_faults:
+      enabled: true
+    container.memory.pressure.stalled:
+      enabled: true
+    container.memory.pressure.waiting:
       enabled: true
     container.memory.rss:
       enabled: true
@@ -150,6 +162,10 @@ all_set:
       enabled: true
 none_set:
   metrics:
+    container.cpu.pressure.stalled:
+      enabled: false
+    container.cpu.pressure.waiting:
+      enabled: false
     container.cpu.time:
       enabled: false
     container.cpu.usage:
@@ -160,11 +176,19 @@ none_set:
       enabled: false
     container.filesystem.usage:
       enabled: false
+    container.io.pressure.stalled:
+      enabled: false
+    container.io.pressure.waiting:
+      enabled: false
     container.memory.available:
       enabled: false
     container.memory.major_page_faults:
       enabled: false
     container.memory.page_faults:
+      enabled: false
+    container.memory.pressure.stalled:
+      enabled: false
+    container.memory.pressure.waiting:
       enabled: false
     container.memory.rss:
       enabled: false

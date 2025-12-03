@@ -39,6 +39,12 @@ var MapAttributeDirection = map[string]AttributeDirection{
 }
 
 var MetricsInfo = metricsInfo{
+	ContainerCPUPressureStalled: metricInfo{
+		Name: "container.cpu.pressure.stalled",
+	},
+	ContainerCPUPressureWaiting: metricInfo{
+		Name: "container.cpu.pressure.waiting",
+	},
 	ContainerCPUTime: metricInfo{
 		Name: "container.cpu.time",
 	},
@@ -54,6 +60,12 @@ var MetricsInfo = metricsInfo{
 	ContainerFilesystemUsage: metricInfo{
 		Name: "container.filesystem.usage",
 	},
+	ContainerIoPressureStalled: metricInfo{
+		Name: "container.io.pressure.stalled",
+	},
+	ContainerIoPressureWaiting: metricInfo{
+		Name: "container.io.pressure.waiting",
+	},
 	ContainerMemoryAvailable: metricInfo{
 		Name: "container.memory.available",
 	},
@@ -62,6 +74,12 @@ var MetricsInfo = metricsInfo{
 	},
 	ContainerMemoryPageFaults: metricInfo{
 		Name: "container.memory.page_faults",
+	},
+	ContainerMemoryPressureStalled: metricInfo{
+		Name: "container.memory.pressure.stalled",
+	},
+	ContainerMemoryPressureWaiting: metricInfo{
+		Name: "container.memory.pressure.waiting",
 	},
 	ContainerMemoryRss: metricInfo{
 		Name: "container.memory.rss",
@@ -216,14 +234,20 @@ var MetricsInfo = metricsInfo{
 }
 
 type metricsInfo struct {
+	ContainerCPUPressureStalled          metricInfo
+	ContainerCPUPressureWaiting          metricInfo
 	ContainerCPUTime                     metricInfo
 	ContainerCPUUsage                    metricInfo
 	ContainerFilesystemAvailable         metricInfo
 	ContainerFilesystemCapacity          metricInfo
 	ContainerFilesystemUsage             metricInfo
+	ContainerIoPressureStalled           metricInfo
+	ContainerIoPressureWaiting           metricInfo
 	ContainerMemoryAvailable             metricInfo
 	ContainerMemoryMajorPageFaults       metricInfo
 	ContainerMemoryPageFaults            metricInfo
+	ContainerMemoryPressureStalled       metricInfo
+	ContainerMemoryPressureWaiting       metricInfo
 	ContainerMemoryRss                   metricInfo
 	ContainerMemoryUsage                 metricInfo
 	ContainerMemoryWorkingSet            metricInfo
@@ -278,6 +302,108 @@ type metricsInfo struct {
 
 type metricInfo struct {
 	Name string
+}
+
+type metricContainerCPUPressureStalled struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills container.cpu.pressure.stalled metric with initial data.
+func (m *metricContainerCPUPressureStalled) init() {
+	m.data.SetName("container.cpu.pressure.stalled")
+	m.data.SetDescription("Total cumulative CPU stalled time")
+	m.data.SetUnit("s")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(true)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricContainerCPUPressureStalled) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricContainerCPUPressureStalled) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricContainerCPUPressureStalled) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricContainerCPUPressureStalled(cfg MetricConfig) metricContainerCPUPressureStalled {
+	m := metricContainerCPUPressureStalled{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricContainerCPUPressureWaiting struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills container.cpu.pressure.waiting metric with initial data.
+func (m *metricContainerCPUPressureWaiting) init() {
+	m.data.SetName("container.cpu.pressure.waiting")
+	m.data.SetDescription("Total cumulative CPU waiting time")
+	m.data.SetUnit("s")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(true)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricContainerCPUPressureWaiting) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricContainerCPUPressureWaiting) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricContainerCPUPressureWaiting) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricContainerCPUPressureWaiting(cfg MetricConfig) metricContainerCPUPressureWaiting {
+	m := metricContainerCPUPressureWaiting{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
 }
 
 type metricContainerCPUTime struct {
@@ -527,6 +653,108 @@ func newMetricContainerFilesystemUsage(cfg MetricConfig) metricContainerFilesyst
 	return m
 }
 
+type metricContainerIoPressureStalled struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills container.io.pressure.stalled metric with initial data.
+func (m *metricContainerIoPressureStalled) init() {
+	m.data.SetName("container.io.pressure.stalled")
+	m.data.SetDescription("Total cumulative I/O stalled time")
+	m.data.SetUnit("s")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(true)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricContainerIoPressureStalled) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricContainerIoPressureStalled) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricContainerIoPressureStalled) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricContainerIoPressureStalled(cfg MetricConfig) metricContainerIoPressureStalled {
+	m := metricContainerIoPressureStalled{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricContainerIoPressureWaiting struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills container.io.pressure.waiting metric with initial data.
+func (m *metricContainerIoPressureWaiting) init() {
+	m.data.SetName("container.io.pressure.waiting")
+	m.data.SetDescription("Total cumulative I/O waiting time")
+	m.data.SetUnit("s")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(true)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricContainerIoPressureWaiting) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricContainerIoPressureWaiting) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricContainerIoPressureWaiting) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricContainerIoPressureWaiting(cfg MetricConfig) metricContainerIoPressureWaiting {
+	m := metricContainerIoPressureWaiting{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
 type metricContainerMemoryAvailable struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	config   MetricConfig   // metric config provided by user.
@@ -667,6 +895,108 @@ func (m *metricContainerMemoryPageFaults) emit(metrics pmetric.MetricSlice) {
 
 func newMetricContainerMemoryPageFaults(cfg MetricConfig) metricContainerMemoryPageFaults {
 	m := metricContainerMemoryPageFaults{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricContainerMemoryPressureStalled struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills container.memory.pressure.stalled metric with initial data.
+func (m *metricContainerMemoryPressureStalled) init() {
+	m.data.SetName("container.memory.pressure.stalled")
+	m.data.SetDescription("Total cumulative memory stalled time")
+	m.data.SetUnit("s")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(true)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricContainerMemoryPressureStalled) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricContainerMemoryPressureStalled) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricContainerMemoryPressureStalled) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricContainerMemoryPressureStalled(cfg MetricConfig) metricContainerMemoryPressureStalled {
+	m := metricContainerMemoryPressureStalled{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricContainerMemoryPressureWaiting struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills container.memory.pressure.waiting metric with initial data.
+func (m *metricContainerMemoryPressureWaiting) init() {
+	m.data.SetName("container.memory.pressure.waiting")
+	m.data.SetDescription("Total cumulative memory waiting time")
+	m.data.SetUnit("s")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(true)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricContainerMemoryPressureWaiting) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricContainerMemoryPressureWaiting) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricContainerMemoryPressureWaiting) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricContainerMemoryPressureWaiting(cfg MetricConfig) metricContainerMemoryPressureWaiting {
+	m := metricContainerMemoryPressureWaiting{config: cfg}
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -3166,14 +3496,20 @@ type MetricsBuilder struct {
 	buildInfo                                  component.BuildInfo  // contains version information.
 	resourceAttributeIncludeFilter             map[string]filter.Filter
 	resourceAttributeExcludeFilter             map[string]filter.Filter
+	metricContainerCPUPressureStalled          metricContainerCPUPressureStalled
+	metricContainerCPUPressureWaiting          metricContainerCPUPressureWaiting
 	metricContainerCPUTime                     metricContainerCPUTime
 	metricContainerCPUUsage                    metricContainerCPUUsage
 	metricContainerFilesystemAvailable         metricContainerFilesystemAvailable
 	metricContainerFilesystemCapacity          metricContainerFilesystemCapacity
 	metricContainerFilesystemUsage             metricContainerFilesystemUsage
+	metricContainerIoPressureStalled           metricContainerIoPressureStalled
+	metricContainerIoPressureWaiting           metricContainerIoPressureWaiting
 	metricContainerMemoryAvailable             metricContainerMemoryAvailable
 	metricContainerMemoryMajorPageFaults       metricContainerMemoryMajorPageFaults
 	metricContainerMemoryPageFaults            metricContainerMemoryPageFaults
+	metricContainerMemoryPressureStalled       metricContainerMemoryPressureStalled
+	metricContainerMemoryPressureWaiting       metricContainerMemoryPressureWaiting
 	metricContainerMemoryRss                   metricContainerMemoryRss
 	metricContainerMemoryUsage                 metricContainerMemoryUsage
 	metricContainerMemoryWorkingSet            metricContainerMemoryWorkingSet
@@ -3249,14 +3585,20 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings receiver.Settings, opt
 		startTime:                                  pcommon.NewTimestampFromTime(time.Now()),
 		metricsBuffer:                              pmetric.NewMetrics(),
 		buildInfo:                                  settings.BuildInfo,
+		metricContainerCPUPressureStalled:          newMetricContainerCPUPressureStalled(mbc.Metrics.ContainerCPUPressureStalled),
+		metricContainerCPUPressureWaiting:          newMetricContainerCPUPressureWaiting(mbc.Metrics.ContainerCPUPressureWaiting),
 		metricContainerCPUTime:                     newMetricContainerCPUTime(mbc.Metrics.ContainerCPUTime),
 		metricContainerCPUUsage:                    newMetricContainerCPUUsage(mbc.Metrics.ContainerCPUUsage),
 		metricContainerFilesystemAvailable:         newMetricContainerFilesystemAvailable(mbc.Metrics.ContainerFilesystemAvailable),
 		metricContainerFilesystemCapacity:          newMetricContainerFilesystemCapacity(mbc.Metrics.ContainerFilesystemCapacity),
 		metricContainerFilesystemUsage:             newMetricContainerFilesystemUsage(mbc.Metrics.ContainerFilesystemUsage),
+		metricContainerIoPressureStalled:           newMetricContainerIoPressureStalled(mbc.Metrics.ContainerIoPressureStalled),
+		metricContainerIoPressureWaiting:           newMetricContainerIoPressureWaiting(mbc.Metrics.ContainerIoPressureWaiting),
 		metricContainerMemoryAvailable:             newMetricContainerMemoryAvailable(mbc.Metrics.ContainerMemoryAvailable),
 		metricContainerMemoryMajorPageFaults:       newMetricContainerMemoryMajorPageFaults(mbc.Metrics.ContainerMemoryMajorPageFaults),
 		metricContainerMemoryPageFaults:            newMetricContainerMemoryPageFaults(mbc.Metrics.ContainerMemoryPageFaults),
+		metricContainerMemoryPressureStalled:       newMetricContainerMemoryPressureStalled(mbc.Metrics.ContainerMemoryPressureStalled),
+		metricContainerMemoryPressureWaiting:       newMetricContainerMemoryPressureWaiting(mbc.Metrics.ContainerMemoryPressureWaiting),
 		metricContainerMemoryRss:                   newMetricContainerMemoryRss(mbc.Metrics.ContainerMemoryRss),
 		metricContainerMemoryUsage:                 newMetricContainerMemoryUsage(mbc.Metrics.ContainerMemoryUsage),
 		metricContainerMemoryWorkingSet:            newMetricContainerMemoryWorkingSet(mbc.Metrics.ContainerMemoryWorkingSet),
@@ -3469,14 +3811,20 @@ func (mb *MetricsBuilder) EmitForResource(options ...ResourceMetricsOption) {
 	ils.Scope().SetName(ScopeName)
 	ils.Scope().SetVersion(mb.buildInfo.Version)
 	ils.Metrics().EnsureCapacity(mb.metricsCapacity)
+	mb.metricContainerCPUPressureStalled.emit(ils.Metrics())
+	mb.metricContainerCPUPressureWaiting.emit(ils.Metrics())
 	mb.metricContainerCPUTime.emit(ils.Metrics())
 	mb.metricContainerCPUUsage.emit(ils.Metrics())
 	mb.metricContainerFilesystemAvailable.emit(ils.Metrics())
 	mb.metricContainerFilesystemCapacity.emit(ils.Metrics())
 	mb.metricContainerFilesystemUsage.emit(ils.Metrics())
+	mb.metricContainerIoPressureStalled.emit(ils.Metrics())
+	mb.metricContainerIoPressureWaiting.emit(ils.Metrics())
 	mb.metricContainerMemoryAvailable.emit(ils.Metrics())
 	mb.metricContainerMemoryMajorPageFaults.emit(ils.Metrics())
 	mb.metricContainerMemoryPageFaults.emit(ils.Metrics())
+	mb.metricContainerMemoryPressureStalled.emit(ils.Metrics())
+	mb.metricContainerMemoryPressureWaiting.emit(ils.Metrics())
 	mb.metricContainerMemoryRss.emit(ils.Metrics())
 	mb.metricContainerMemoryUsage.emit(ils.Metrics())
 	mb.metricContainerMemoryWorkingSet.emit(ils.Metrics())
@@ -3558,6 +3906,16 @@ func (mb *MetricsBuilder) Emit(options ...ResourceMetricsOption) pmetric.Metrics
 	return metrics
 }
 
+// RecordContainerCPUPressureStalledDataPoint adds a data point to container.cpu.pressure.stalled metric.
+func (mb *MetricsBuilder) RecordContainerCPUPressureStalledDataPoint(ts pcommon.Timestamp, val float64) {
+	mb.metricContainerCPUPressureStalled.recordDataPoint(mb.startTime, ts, val)
+}
+
+// RecordContainerCPUPressureWaitingDataPoint adds a data point to container.cpu.pressure.waiting metric.
+func (mb *MetricsBuilder) RecordContainerCPUPressureWaitingDataPoint(ts pcommon.Timestamp, val float64) {
+	mb.metricContainerCPUPressureWaiting.recordDataPoint(mb.startTime, ts, val)
+}
+
 // RecordContainerCPUTimeDataPoint adds a data point to container.cpu.time metric.
 func (mb *MetricsBuilder) RecordContainerCPUTimeDataPoint(ts pcommon.Timestamp, val float64) {
 	mb.metricContainerCPUTime.recordDataPoint(mb.startTime, ts, val)
@@ -3583,6 +3941,16 @@ func (mb *MetricsBuilder) RecordContainerFilesystemUsageDataPoint(ts pcommon.Tim
 	mb.metricContainerFilesystemUsage.recordDataPoint(mb.startTime, ts, val)
 }
 
+// RecordContainerIoPressureStalledDataPoint adds a data point to container.io.pressure.stalled metric.
+func (mb *MetricsBuilder) RecordContainerIoPressureStalledDataPoint(ts pcommon.Timestamp, val float64) {
+	mb.metricContainerIoPressureStalled.recordDataPoint(mb.startTime, ts, val)
+}
+
+// RecordContainerIoPressureWaitingDataPoint adds a data point to container.io.pressure.waiting metric.
+func (mb *MetricsBuilder) RecordContainerIoPressureWaitingDataPoint(ts pcommon.Timestamp, val float64) {
+	mb.metricContainerIoPressureWaiting.recordDataPoint(mb.startTime, ts, val)
+}
+
 // RecordContainerMemoryAvailableDataPoint adds a data point to container.memory.available metric.
 func (mb *MetricsBuilder) RecordContainerMemoryAvailableDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricContainerMemoryAvailable.recordDataPoint(mb.startTime, ts, val)
@@ -3596,6 +3964,16 @@ func (mb *MetricsBuilder) RecordContainerMemoryMajorPageFaultsDataPoint(ts pcomm
 // RecordContainerMemoryPageFaultsDataPoint adds a data point to container.memory.page_faults metric.
 func (mb *MetricsBuilder) RecordContainerMemoryPageFaultsDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricContainerMemoryPageFaults.recordDataPoint(mb.startTime, ts, val)
+}
+
+// RecordContainerMemoryPressureStalledDataPoint adds a data point to container.memory.pressure.stalled metric.
+func (mb *MetricsBuilder) RecordContainerMemoryPressureStalledDataPoint(ts pcommon.Timestamp, val float64) {
+	mb.metricContainerMemoryPressureStalled.recordDataPoint(mb.startTime, ts, val)
+}
+
+// RecordContainerMemoryPressureWaitingDataPoint adds a data point to container.memory.pressure.waiting metric.
+func (mb *MetricsBuilder) RecordContainerMemoryPressureWaitingDataPoint(ts pcommon.Timestamp, val float64) {
+	mb.metricContainerMemoryPressureWaiting.recordDataPoint(mb.startTime, ts, val)
 }
 
 // RecordContainerMemoryRssDataPoint adds a data point to container.memory.rss metric.

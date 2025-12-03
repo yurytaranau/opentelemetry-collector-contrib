@@ -27,6 +27,14 @@ func addCPUMetrics(
 		addCPUUtilizationMetrics(mb, cpuMetrics, usageCores, currentTime, r, nodeCPULimit)
 	}
 	addCPUTimeMetric(mb, cpuMetrics.Time, s, currentTime)
+	if s.PSI != nil {
+		if s.PSI.Full.Total != 0 {
+			cpuMetrics.PressureStalled(mb, currentTime, float64(s.PSI.Full.Total)/1_000_000)
+		}
+		if s.PSI.Some.Total != 0 {
+			cpuMetrics.PressureWaiting(mb, currentTime, float64(s.PSI.Some.Total)/1_000_000)
+		}
+	}
 }
 
 func addCPUUtilizationMetrics(
